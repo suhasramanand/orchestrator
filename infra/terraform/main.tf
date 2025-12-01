@@ -64,13 +64,15 @@ resource "aws_dynamodb_table" "tasks" {
   }
 
   global_secondary_index {
-    name     = "job-id-index"
-    hash_key = "job_id"
+    name           = "job-id-index"
+    hash_key       = "job_id"
+    projection_type = "ALL"
   }
 
   global_secondary_index {
-    name     = "status-index"
-    hash_key = "status"
+    name           = "status-index"
+    hash_key       = "status"
+    projection_type = "ALL"
   }
 
   tags = {
