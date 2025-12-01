@@ -1,30 +1,30 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Setting up Local Kubernetes Cluster"
+echo "Setting up Local Kubernetes Cluster"
 echo "========================================"
 echo ""
 
 # Check Docker
 if ! command -v docker &> /dev/null; then
-    echo "❌ Docker is not installed"
+    echo "Docker is not installed"
     echo "   Install Docker Desktop: https://www.docker.com/products/docker-desktop"
     exit 1
 fi
 
 # Check if Docker is running
 if ! docker info &> /dev/null; then
-    echo "❌ Docker is not running"
+    echo "Docker is not running"
     echo "   Please start Docker Desktop"
     exit 1
 fi
 
-echo "✅ Docker is running"
+echo "Docker is running"
 echo ""
 
 # Install kind if not present
 if ! command -v kind &> /dev/null; then
-    echo "📦 Installing kind..."
+    echo "Installing kind..."
     if [[ "$OSTYPE" == "darwin"* ]]; then
         brew install kind
     else
@@ -33,12 +33,12 @@ if ! command -v kind &> /dev/null; then
     fi
 fi
 
-echo "✅ kind is installed: $(kind --version)"
+echo "kind is installed: $(kind --version)"
 echo ""
 
 # Check if cluster already exists
 if kind get clusters | grep -q job-orchestration; then
-    echo "⚠️  Cluster 'job-orchestration' already exists"
+    echo "Cluster 'job-orchestration' already exists"
     read -p "Delete and recreate? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -53,7 +53,7 @@ if kind get clusters | grep -q job-orchestration; then
 fi
 
 # Create cluster
-echo "🔧 Creating kind cluster..."
+echo "Creating kind cluster..."
 kind create cluster --name job-orchestration --wait 5m
 
 # Set kubeconfig
@@ -61,7 +61,7 @@ export KUBECONFIG=$(kind get kubeconfig --name job-orchestration)
 kubectl cluster-info --context kind-job-orchestration
 
 echo ""
-echo "✅ Kubernetes cluster is ready!"
+echo "Kubernetes cluster is ready!"
 echo ""
-echo "📊 Cluster info:"
+echo "Cluster info:"
 kubectl get nodes

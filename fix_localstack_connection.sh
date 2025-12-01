@@ -3,7 +3,7 @@ set -e
 
 export KUBECONFIG=$(kind get kubeconfig --name job-orchestration)
 
-echo "🔧 Fixing LocalStack connection for Kubernetes workers"
+echo "Fixing LocalStack connection for Kubernetes workers"
 echo "====================================================="
 echo ""
 
@@ -16,27 +16,27 @@ if [ -z "$LOCALSTACK_IP" ]; then
 fi
 
 if [ -z "$LOCALSTACK_IP" ]; then
-    echo "⚠️  Could not get LocalStack IP, using host.docker.internal"
+    echo "Could not get LocalStack IP, using host.docker.internal"
     QUEUE_URL="http://host.docker.internal:4566/000000000000/tasks"
 else
-    echo "✅ Found LocalStack IP: $LOCALSTACK_IP"
+    echo "Found LocalStack IP: $LOCALSTACK_IP"
     QUEUE_URL="http://$LOCALSTACK_IP:4566/000000000000/tasks"
 fi
 
-echo "📝 Queue URL: $QUEUE_URL"
+echo "Queue URL: $QUEUE_URL"
 echo ""
 
 # Update deployment
-echo "🔄 Updating deployment..."
+echo "Updating deployment..."
 kubectl set env deployment/job-worker SQS_QUEUE_URL="$QUEUE_URL"
 
-echo "✅ Deployment updated"
+echo "Deployment updated"
 echo ""
-echo "⏳ Waiting for pods to restart..."
+echo "Waiting for pods to restart..."
 sleep 5
 
 kubectl get pods -l app=job-worker
 
 echo ""
-echo "📋 Check logs:"
+echo "Check logs:"
 echo "   kubectl logs -f deployment/job-worker"
