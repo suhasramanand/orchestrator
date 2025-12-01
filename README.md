@@ -1,284 +1,232 @@
 # Distributed Job Orchestration Platform
 
-A production-quality distributed job orchestration system combining AWS Serverless (Step Functions, Lambda, SQS) with Kubernetes compute cluster for scalable task processing.
+A production-ready distributed job orchestration system that combines AWS Serverless services (Step Functions, SQS, Lambda) with Kubernetes for scalable compute. Users submit jobs via REST API, which are automatically broken into parallel tasks, orchestrated through AWS Step Functions, queued in SQS, and processed by Kubernetes workers.
 
-## Architecture Overview
+## What This Project Is About
 
-### High-Level Design
+This is a **distributed job orchestration platform** that demonstrates how to build a scalable system for processing large workloads by breaking them into smaller, parallel tasks. Think of it like a job queue system where:
+
+1. **You submit a job** (e.g., "process 1000 images" or "run ML inference on a dataset")
+2. **The system splits it** into smaller tasks (e.g., 1000 tasks, one per image)
+3. **Tasks are queued** in AWS SQS (or LocalStack for local dev)
+4. **Kubernetes workers** pull tasks from the queue and process them in parallel
+5. **Progress is tracked** in real-time through a web dashboard
+
+### Real-World Use Cases
+
+- **Data Processing**: ETL pipelines, batch data transformations
+- **ML Inference**: Running predictions on large datasets
+- **Image/Video Processing**: Thumbnail generation, format conversion
+- **Report Generation**: Creating reports from large datasets
+- **Scientific Computing**: Parallel simulations, matrix operations
+
+### Key Features
+
+- ✅ **REST API** for job submission and status tracking
+- ✅ **AWS Step Functions** for workflow orchestration
+- ✅ **SQS** for reliable task queuing
+- ✅ **Kubernetes** for scalable worker deployment
+- ✅ **Real-time Dashboard** with React frontend
+- ✅ **Analytics** with charts and metrics
+- ✅ **Local Development** support with LocalStack and kind
+
+## Architecture
 
 ```
 ┌─────────────┐
-│   React     │
-│  Frontend   │
+│   Client    │
+│  (Browser)  │
 └──────┬──────┘
-       │ HTTP
-       ▼
-┌─────────────────────────────────────────┐
-│         API Gateway / ALB               │
-└──────┬──────────────────────────────────┘
        │
        ▼
-┌─────────────────────────────────────────┐
-│      FastAPI Backend (Control Plane)    │
-│  - Job Management API                    │
-│  - DynamoDB/Postgres for state          │
-│  - Step Functions orchestration         │
-└──────┬──────────────────────────────────┘
-       │
-       ├──► AWS Step Functions (Workflow)
-       │    ├──► Lambda: Create Tasks
-       │    ├──► SQS: Task Queue
-       │    └──► Lambda: Monitor Completion
-       │
-       ▼
-┌─────────────────────────────────────────┐
-│         AWS SQS (Task Queue)            │
-└──────┬──────────────────────────────────┘
-       │
-       ▼
-┌─────────────────────────────────────────┐
-│    Kubernetes Cluster (Compute)         │
-│  - Worker Pods/Jobs                     │
-│  - Poll SQS for tasks                   │
-│  - Process tasks                        │
-│  - Update status via API                │
-└─────────────────────────────────────────┘
+┌─────────────────┐     ┌──────────────┐     ┌─────────────┐
+│   FastAPI       │────▶│ Step Functions│────▶│     SQS     │
+│   Backend       │     │  (Orchestrator)│     │   (Queue)   │
+└─────────────────┘     └──────────────┘     └──────┬───────┘
+       │                                              │
+       │                                              ▼
+       │                                    ┌─────────────────┐
+       │                                    │  Kubernetes     │
+       └────────────────────────────────────│    Workers      │
+                                            │  (Task Process) │
+                                            └─────────────────┘
 ```
-
-### Component Details
-
-1. **Frontend (React + TypeScript)**
-   - Job submission form
-   - Job list with status
-   - Job detail view with task progress
-
-2. **Backend API (FastAPI)**
-   - RESTful endpoints for job management
-   - DynamoDB/Postgres integration
-   - Step Functions workflow initiation
-   - Task status tracking
-
-3. **AWS Step Functions**
-   - Orchestrates job lifecycle
-   - States: CREATE_TASKS → ENQUEUE_TASKS → MONITOR → COMPLETE/FAIL
-
-4. **AWS SQS**
-   - Task queue for worker consumption
-   - Dead-letter queue for failed tasks
-
-5. **Kubernetes Workers**
-   - Poll SQS for tasks
-   - Execute compute workloads
-   - Report completion via API
-
-6. **Data Storage**
-   - DynamoDB (production): Job and Task tables
-   - Postgres (local dev): SQL tables for easier testing
 
 ## Tech Stack
 
-- **Backend**: Python 3.11+, FastAPI
-- **Worker**: Python 3.11+, boto3 (SQS)
-- **Frontend**: React 18+, TypeScript
-- **Infrastructure**: Terraform, Kubernetes
-- **Database**: DynamoDB (AWS) / Postgres (local)
-- **Orchestration**: AWS Step Functions
-- **Messaging**: AWS SQS
+### Backend
+- **FastAPI** - REST API framework
+- **SQLAlchemy** - ORM for database operations
+- **SQLite/PostgreSQL** - Job and task metadata storage
+- **Alembic** - Database migrations
 
-## Local Development Setup
+### Frontend
+- **React** + **TypeScript** - UI framework
+- **Vite** - Build tool
+- **Recharts** - Analytics visualizations
+- **Axios** - API client
 
-For detailed local setup instructions, see [SETUP_LOCAL.md](./SETUP_LOCAL.md)
+### Infrastructure
+- **AWS Step Functions** - Workflow orchestration
+- **AWS SQS** - Message queue
+- **Kubernetes (kind)** - Container orchestration
+- **LocalStack** - Local AWS emulation
+- **Terraform** - Infrastructure as Code
+
+### Worker
+- **Python** - Task processing logic
+- **boto3** - AWS SDK for SQS
+- **NumPy** - Matrix operations (for demo workloads)
+
+## Quick Start
 
 ### Prerequisites
-
-- Python 3.11+
+- Python 3.12+
 - Node.js 18+
 - Docker & Docker Compose
-- Kubernetes cluster (kind, minikube, or local K8s)
-- kubectl configured
-- AWS CLI (for AWS deployment, optional for local)
+- kubectl & kind (for Kubernetes)
 
-### Quick Start
+### Local Setup
 
-1. **Clone and setup environment**:
-```bash
-cd distributed-job-orchestration
-```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/suhasramanand/orchestrator.git
+   cd orchestrator
+   ```
 
-2. **Start local Postgres**:
-```bash
-docker-compose up -d postgres
-```
+2. **Start the database**
+   ```bash
+   docker-compose up -d postgres
+   ```
 
-3. **Setup backend**:
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/jobdb
-export AWS_REGION=us-east-1  # For local, can be any
-export AWS_ACCESS_KEY_ID=test  # LocalStack or mock
-export AWS_SECRET_ACCESS_KEY=test
-python -m alembic upgrade head
-uvicorn app.main:app --reload --port 8000
-```
+3. **Set up backend**
+   ```bash
+   cd backend
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   python -c "from app.db.database import create_db_and_tables; create_db_and_tables()"
+   uvicorn app.main:app --reload --port 8000
+   ```
 
-4. **Setup frontend**:
-```bash
-cd frontend
-npm install
-npm start
-```
+4. **Set up frontend**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-5. **Deploy worker to Kubernetes**:
-```bash
-# Build worker image
-cd worker
-docker build -t job-worker:latest .
+5. **Set up LocalStack and Kubernetes** (see [LOCALSTACK_SETUP.md](./LOCALSTACK_SETUP.md) and [K8S_SETUP_GUIDE.md](./K8S_SETUP_GUIDE.md))
 
-# Load into kind (if using kind)
-kind load docker-image job-worker:latest
-
-# Apply K8s manifests
-kubectl apply -f ../infra/k8s/
-```
-
-6. **Run worker locally (alternative to K8s)**:
-```bash
-cd worker
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-export AWS_REGION=us-east-1
-export AWS_ACCESS_KEY_ID=test
-export AWS_SECRET_ACCESS_KEY=test
-export SQS_QUEUE_URL=http://localhost:4566/000000000000/tasks  # LocalStack
-export API_BASE_URL=http://localhost:8000
-python worker.py
-```
+6. **Access the application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+   - API Docs: http://localhost:8000/docs
 
 ## Project Structure
 
 ```
-.
-├── backend/              # FastAPI application
+orchestrator/
+├── backend/              # FastAPI backend
 │   ├── app/
-│   │   ├── main.py      # FastAPI app entrypoint
-│   │   ├── models/      # Pydantic models
-│   │   ├── routes/      # API routes
-│   │   ├── services/    # Business logic
-│   │   ├── db/          # Database models & migrations
-│   │   └── utils/       # Utilities
-│   ├── alembic/         # Database migrations
-│   └── requirements.txt
-├── worker/              # Kubernetes worker
-│   ├── worker.py        # Main worker logic
-│   ├── Dockerfile
-│   └── requirements.txt
-├── frontend/            # React + TypeScript
+│   │   ├── db/          # Database models and connection
+│   │   ├── models/      # Pydantic schemas
+│   │   ├── routes/      # API endpoints
+│   │   ├── services/     # Business logic
+│   │   └── utils/       # Configuration and utilities
+│   └── alembic/         # Database migrations
+├── frontend/            # React frontend
 │   ├── src/
-│   │   ├── components/
-│   │   ├── services/
-│   │   └── App.tsx
-│   └── package.json
-├── infra/
-│   ├── terraform/       # AWS infrastructure
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── outputs.tf
-│   └── k8s/            # Kubernetes manifests
-│       ├── deployment.yaml
-│       ├── service.yaml
-│       ├── job-worker.yaml
-│       └── configmap.yaml
-├── docker-compose.yml   # Local Postgres
-└── README.md
+│   │   ├── components/   # React components
+│   │   ├── services/     # API client
+│   │   └── types/       # TypeScript types
+│   └── public/
+├── worker/              # Kubernetes worker
+│   └── worker.py        # SQS polling and task processing
+├── infra/               # Infrastructure as Code
+│   ├── k8s/            # Kubernetes manifests
+│   └── terraform/      # AWS Terraform configs
+├── screenshots/         # UI screenshots
+├── ui-demo.mp4         # Demo video
+└── docs/               # Documentation
 ```
 
 ## API Endpoints
 
 ### Jobs
-
 - `POST /api/v1/jobs` - Create a new job
-- `GET /api/v1/jobs` - List jobs (paginated)
+- `GET /api/v1/jobs` - List jobs (with pagination and search)
 - `GET /api/v1/jobs/{job_id}` - Get job details
-- `GET /api/v1/jobs/{job_id}/tasks` - Get tasks for a job
 
 ### Tasks
+- `GET /api/v1/jobs/{job_id}/tasks` - Get tasks for a job
+- `POST /api/v1/tasks/{task_id}/running` - Mark task as running
+- `POST /api/v1/tasks/{task_id}/complete` - Mark task as complete
+- `POST /api/v1/tasks/{task_id}/failed` - Mark task as failed
 
-- `GET /api/v1/tasks/{task_id}` - Get task details
-- `POST /api/v1/tasks/{task_id}/complete` - Mark task as complete (called by worker)
+### Analytics
+- `GET /api/v1/analytics/overview` - Overview statistics
+- `GET /api/v1/analytics/jobs-by-type` - Jobs grouped by type
+- `GET /api/v1/analytics/jobs-by-status` - Jobs grouped by status
+- `GET /api/v1/analytics/tasks-by-status` - Tasks grouped by status
+- `GET /api/v1/analytics/timeline?days=7` - Job creation timeline
+- `GET /api/v1/analytics/processing-time-stats` - Processing time statistics
 
-## Job Lifecycle
+## How It Works
 
-1. **CREATE**: User submits job via API
-2. **ENQUEUE**: Step Functions creates tasks and enqueues to SQS
-3. **PROCESSING**: Workers poll SQS and process tasks
-4. **COMPLETE**: All tasks complete, job marked as succeeded
-5. **FAILED**: Task failures exceed threshold, job marked as failed
+1. **Job Submission**: User creates a job via the web UI or API, specifying:
+   - Job type (compute, data_processing, ml_inference)
+   - Number of tasks to create
+   - Work type (CPU-bound, I/O-bound, matrix multiplication)
+   - Duration and parameters
 
-## Features
+2. **Task Creation**: Backend creates individual tasks and enqueues them to SQS
 
-- ✅ Distributed task processing
-- ✅ Automatic retries with exponential backoff
-- ✅ Idempotent operations
-- ✅ Real-time job status tracking
-- ✅ Horizontal scaling via Kubernetes
-- ✅ Serverless orchestration with Step Functions
-- ✅ Dead-letter queue for failed tasks
-- ✅ Comprehensive logging
+3. **Worker Processing**: Kubernetes workers continuously poll SQS for tasks:
+   - Receive task message
+   - Mark task as "RUNNING" via API
+   - Execute the work (simulated computation)
+   - Mark task as "COMPLETED" or "FAILED"
+   - Delete message from SQS
 
-## Deployment
+4. **Status Updates**: Job status automatically updates as tasks complete
 
-### AWS Deployment
+5. **Monitoring**: Real-time dashboard shows job progress, analytics, and metrics
 
-1. **Deploy infrastructure**:
-```bash
-cd infra/terraform
-terraform init
-terraform plan
-terraform apply
-```
+## Local Development
 
-2. **Deploy backend** (Lambda or ECS/Fargate)
-3. **Deploy frontend** (S3 + CloudFront)
-4. **Deploy workers** to EKS or local K8s cluster
+For local development without AWS:
+- **LocalStack** emulates SQS
+- **SQLite** replaces PostgreSQL (optional)
+- **kind** provides local Kubernetes cluster
+- Workers connect to LocalStack via Kubernetes service
 
-### Kubernetes Deployment
+See [SETUP_LOCAL.md](./SETUP_LOCAL.md) for detailed setup instructions.
 
-```bash
-kubectl apply -f infra/k8s/
-```
+## Documentation
 
-## Testing
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - System architecture and design
+- [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) - Visual architecture diagrams
+- [SETUP_LOCAL.md](./SETUP_LOCAL.md) - Local development setup
+- [LOCALSTACK_SETUP.md](./LOCALSTACK_SETUP.md) - LocalStack configuration
+- [K8S_SETUP_GUIDE.md](./K8S_SETUP_GUIDE.md) - Kubernetes setup
+- [PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md) - Comprehensive project documentation
+- [SCREENSHOTS.md](./SCREENSHOTS.md) - UI screenshots and demo video
 
-### Backend Tests
-```bash
-cd backend
-pytest
-```
+## Screenshots
 
-### Integration Tests
-```bash
-# Start local services
-docker-compose up -d
+See the [screenshots/](./screenshots/) directory for UI screenshots and [ui-demo.mp4](./ui-demo.mp4) for a video walkthrough.
 
-# Run tests
-pytest tests/integration/
-```
+## Resume Highlights
 
-## Monitoring
-
-- CloudWatch Logs for Lambda/Step Functions
-- Kubernetes logs: `kubectl logs -f deployment/job-worker`
-- Backend logs: Structured JSON logging
-
-## Performance Metrics
-
-- **Throughput**: Process 1000+ tasks/minute (scales with worker count)
-- **Latency**: <100ms API response time
-- **Reliability**: 99.9% task success rate with retries
+This project demonstrates:
+- **Distributed Systems**: Job orchestration, task distribution, worker pooling
+- **Cloud Architecture**: AWS Step Functions, SQS, Lambda integration
+- **Container Orchestration**: Kubernetes deployments, ConfigMaps, Services
+- **Full-Stack Development**: FastAPI backend, React frontend
+- **Infrastructure as Code**: Terraform for AWS resources
+- **CI/CD**: GitHub Actions workflows
+- **Local Development**: LocalStack, kind, Docker Compose
 
 ## License
 
@@ -286,10 +234,4 @@ MIT
 
 ## Author
 
-Built as a portfolio project demonstrating expertise in:
-- Distributed systems architecture
-- AWS Serverless technologies
-- Kubernetes orchestration
-- Microservices design
-- Infrastructure as Code
-
+Built as a portfolio project demonstrating distributed systems and cloud architecture.
