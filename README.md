@@ -452,9 +452,13 @@ orchestrator/
 ├── infra/               # Infrastructure as Code
 │   ├── k8s/            # Kubernetes manifests
 │   └── terraform/      # AWS Terraform configs
+├── scripts/            # Setup and utility scripts
+│   ├── setup_k8s.sh
+│   ├── setup_localstack.sh
+│   ├── deploy_to_k8s.sh
+│   └── ...
 ├── screenshots/         # UI screenshots
-├── ui-demo.mp4         # Demo video
-└── scripts/            # Setup and utility scripts
+└── ui-demo.mp4         # Demo video
 ```
 
 ## API Endpoints
