@@ -215,13 +215,13 @@ All these scenarios follow the same pattern:
 
 ### Key Features
 
-- ✅ **REST API** for job submission and status tracking
-- ✅ **AWS Step Functions** for workflow orchestration
-- ✅ **SQS** for reliable task queuing
-- ✅ **Kubernetes** for scalable worker deployment
-- ✅ **Real-time Dashboard** with React frontend
-- ✅ **Analytics** with charts and metrics
-- ✅ **Local Development** support with LocalStack and kind
+- **REST API** for job submission and status tracking
+- **AWS Step Functions** for workflow orchestration
+- **SQS** for reliable task queuing
+- **Kubernetes** for scalable worker deployment
+- **Real-time Dashboard** with React frontend
+- **Analytics** with charts and metrics
+- **Local Development** support with LocalStack and kind
 
 ## Architecture
 
@@ -309,7 +309,7 @@ All these scenarios follow the same pattern:
    npm run dev
    ```
 
-5. **Set up LocalStack and Kubernetes** (see [LOCALSTACK_SETUP.md](./LOCALSTACK_SETUP.md) and [K8S_SETUP_GUIDE.md](./K8S_SETUP_GUIDE.md))
+5. **Set up LocalStack and Kubernetes**
 
 6. **Access the application**
    - Frontend: http://localhost:3000
@@ -394,22 +394,6 @@ For local development without AWS:
 - **kind** provides local Kubernetes cluster
 - Workers connect to LocalStack via Kubernetes service
 
-See [SETUP_LOCAL.md](./SETUP_LOCAL.md) for detailed setup instructions.
-
-## Documentation
-
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - System architecture and design
-- [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) - Visual architecture diagrams
-- [SETUP_LOCAL.md](./SETUP_LOCAL.md) - Local development setup
-- [LOCALSTACK_SETUP.md](./LOCALSTACK_SETUP.md) - LocalStack configuration
-- [K8S_SETUP_GUIDE.md](./K8S_SETUP_GUIDE.md) - Kubernetes setup
-- [PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md) - Comprehensive project documentation
-- [SCREENSHOTS.md](./SCREENSHOTS.md) - UI screenshots and demo video
-
-## Screenshots
-
-See the [screenshots/](./screenshots/) directory for UI screenshots and [ui-demo.mp4](./ui-demo.mp4) for a video walkthrough.
-
 ## Resume Highlights
 
 This project demonstrates:
@@ -420,11 +404,3 @@ This project demonstrates:
 - **Infrastructure as Code**: Terraform for AWS resources
 - **CI/CD**: GitHub Actions workflows
 - **Local Development**: LocalStack, kind, Docker Compose
-
-## License
-
-MIT
-
-## Author
-
-Built as a portfolio project demonstrating distributed systems and cloud architecture.
