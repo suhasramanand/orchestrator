@@ -19,7 +19,6 @@ A production-ready distributed job orchestration system that combines AWS Server
 - [API Endpoints](#api-endpoints)
 - [How It Works](#how-it-works)
 - [Development Notes](#development-notes)
-- [Resume Highlights](#resume-highlights)
 
 ## What This Project Is About
 
@@ -578,14 +577,3 @@ orchestrator/
 - Verify image is loaded: `kind load docker-image job-worker:latest`
 - Check pod logs: `kubectl logs <pod-name>`
 - Verify secrets and configmaps exist
-
-## Resume Highlights
-
-This project demonstrates:
-- **Distributed Systems**: Job orchestration, task distribution, worker pooling
-- **Cloud Architecture**: AWS Step Functions, SQS, Lambda integration
-- **Container Orchestration**: Kubernetes deployments, ConfigMaps, Services
-- **Full-Stack Development**: FastAPI backend, React frontend
-- **Infrastructure as Code**: Terraform for AWS resources
-- **CI/CD**: GitHub Actions workflows
-- **Local Development**: LocalStack, kind, Docker Compose
