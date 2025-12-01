@@ -20,6 +20,199 @@ This is a **distributed job orchestration platform** that demonstrates how to bu
 - **Report Generation**: Creating reports from large datasets
 - **Scientific Computing**: Parallel simulations, matrix operations
 
+## Job Examples & Scenarios
+
+### Example 1: Image Processing Pipeline
+
+**Scenario**: A photo-sharing app needs to generate thumbnails for 10,000 uploaded images.
+
+**Job Submission**:
+```json
+POST /api/v1/jobs
+{
+  "job_type": "data_processing",
+  "total_tasks": 10000,
+  "parameters": {
+    "work_type": "io_bound",
+    "duration_seconds": 2,
+    "description": "Generate thumbnails for uploaded images"
+  }
+}
+```
+
+**What Happens**:
+1. System creates a job with 10,000 tasks
+2. Each task represents processing one image
+3. Tasks are enqueued to SQS
+4. Kubernetes workers (scaled to 50 pods) pull tasks in parallel
+5. Each worker:
+   - Downloads image from S3
+   - Generates 3 thumbnail sizes (small, medium, large)
+   - Uploads thumbnails back to S3
+   - Updates task status
+6. Dashboard shows real-time progress: "8,234 / 10,000 completed"
+7. Job completes in ~4 minutes (vs. 5+ hours sequentially)
+
+**Result**: All 10,000 images processed with thumbnails generated and stored.
+
+---
+
+### Example 2: ML Model Inference Batch
+
+**Scenario**: A data science team needs to run predictions on 50,000 customer records using a trained ML model.
+
+**Job Submission**:
+```json
+POST /api/v1/jobs
+{
+  "job_type": "ml_inference",
+  "total_tasks": 50000,
+  "parameters": {
+    "work_type": "cpu_bound",
+    "duration_seconds": 1,
+    "model_version": "v2.3",
+    "batch_size": 100
+  }
+}
+```
+
+**What Happens**:
+1. Job splits 50,000 records into 500 tasks (100 records per task)
+2. Each task loads the ML model and runs inference
+3. Workers process tasks concurrently across 100 Kubernetes pods
+4. Results are written to a results database
+5. Failed tasks are automatically retried (up to 3 times)
+6. Analytics dashboard shows:
+   - Processing rate: ~1,200 tasks/minute
+   - Average task time: 0.8 seconds
+   - Success rate: 99.7%
+
+**Result**: All 50,000 records processed with predictions stored in database.
+
+---
+
+### Example 3: Financial Report Generation
+
+**Scenario**: A fintech company needs to generate monthly reports for 1,000 clients, each requiring complex calculations.
+
+**Job Submission**:
+```json
+POST /api/v1/jobs
+{
+  "job_type": "compute",
+  "total_tasks": 1000,
+  "parameters": {
+    "work_type": "matrix",
+    "duration_seconds": 5,
+    "report_type": "monthly_summary",
+    "include_charts": true
+  }
+}
+```
+
+**What Happens**:
+1. System creates 1,000 tasks (one per client)
+2. Each task:
+   - Fetches client transaction data
+   - Performs matrix calculations (portfolio analysis)
+   - Generates charts and visualizations
+   - Creates PDF report
+   - Emails report to client
+3. Workers process tasks with exponential backoff on failures
+4. Job status updates: PENDING → ENQUEUED → RUNNING → COMPLETED
+5. Dashboard shows progress bar and estimated completion time
+
+**Result**: All 1,000 client reports generated and delivered within 30 minutes.
+
+---
+
+### Example 4: Data Transformation Pipeline
+
+**Scenario**: An e-commerce platform needs to transform and migrate 100,000 product records from legacy database to new schema.
+
+**Job Submission**:
+```json
+POST /api/v1/jobs
+{
+  "job_type": "data_processing",
+  "total_tasks": 100000,
+  "parameters": {
+    "work_type": "io_bound",
+    "duration_seconds": 0.5,
+    "source_db": "legacy_mysql",
+    "target_db": "new_postgres",
+    "transformation_rules": "schema_v2"
+  }
+}
+```
+
+**What Happens**:
+1. Job creates 100,000 tasks (one per product record)
+2. Tasks are distributed across 200 worker pods
+3. Each worker:
+   - Reads product from legacy database
+   - Applies transformation rules
+   - Validates data integrity
+   - Writes to new database
+   - Logs any data quality issues
+4. System handles partial failures gracefully:
+   - 98,500 tasks succeed
+   - 1,500 tasks fail (invalid data)
+   - Failed tasks sent to dead-letter queue for manual review
+5. Job marked as COMPLETED with 98.5% success rate
+
+**Result**: 98,500 products successfully migrated; 1,500 flagged for review.
+
+---
+
+### Example 5: Scientific Simulation
+
+**Scenario**: A research lab needs to run Monte Carlo simulations for 5,000 different parameter combinations.
+
+**Job Submission**:
+```json
+POST /api/v1/jobs
+{
+  "job_type": "compute",
+  "total_tasks": 5000,
+  "parameters": {
+    "work_type": "cpu_bound",
+    "duration_seconds": 10,
+    "simulation_type": "monte_carlo",
+    "iterations": 1000000,
+    "parameters": {
+      "temperature_range": [200, 500],
+      "pressure_range": [1, 10]
+    }
+  }
+}
+```
+
+**What Happens**:
+1. Each task runs a Monte Carlo simulation with different parameters
+2. CPU-intensive work distributed across high-performance worker nodes
+3. Results aggregated and stored in time-series database
+4. Analytics show:
+   - Total compute time: 13.8 hours (parallelized)
+   - Would take 2,875 hours sequentially
+   - Speedup: 208x faster
+5. Job completes successfully with all simulation results available
+
+**Result**: All 5,000 parameter combinations simulated and results available for analysis.
+
+---
+
+### Common Patterns
+
+All these scenarios follow the same pattern:
+1. **Submit Job** → System creates job and tasks
+2. **Queue Tasks** → Tasks enqueued to SQS for reliable delivery
+3. **Scale Workers** → Kubernetes auto-scales workers based on queue depth
+4. **Process in Parallel** → Multiple workers process tasks simultaneously
+5. **Track Progress** → Real-time dashboard shows completion status
+6. **Handle Failures** → Automatic retries and dead-letter queue for failed tasks
+7. **Complete Job** → Job status updates when all tasks finish
+
 ### Key Features
 
 - ✅ **REST API** for job submission and status tracking
