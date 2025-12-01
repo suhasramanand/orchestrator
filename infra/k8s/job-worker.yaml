@@ -1,0 +1,55 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-worker-job
+  namespace: default
+spec:
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        app: job-worker
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: worker
+        image: job-worker:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: WORKER_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: job-worker-config
+              key: AWS_REGION
+        - name: API_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: job-worker-config
+              key: API_BASE_URL
+        - name: SQS_QUEUE_URL
+          value: ""  # Set via Secret or environment
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: access-key-id
+              optional: true
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: secret-access-key
+              optional: true
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+

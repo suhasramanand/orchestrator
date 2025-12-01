@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: job-worker
+  namespace: default
+  labels:
+    app: job-worker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: job-worker
+  template:
+    metadata:
+      labels:
+        app: job-worker
+    spec:
+      containers:
+      - name: worker
+        image: job-worker:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: WORKER_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: job-worker-config
+              key: AWS_REGION
+        - name: API_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: job-worker-config
+              key: API_BASE_URL
+        - name: POLL_INTERVAL_SECONDS
+          valueFrom:
+            configMapKeyRef:
+              name: job-worker-config
+              key: POLL_INTERVAL_SECONDS
+        - name: MAX_MESSAGES_PER_POLL
+          valueFrom:
+            configMapKeyRef:
+              name: job-worker-config
+              key: MAX_MESSAGES_PER_POLL
+        - name: WAIT_TIME_SECONDS
+          valueFrom:
+            configMapKeyRef:
+              name: job-worker-config
+              key: WAIT_TIME_SECONDS
+        - name: SQS_QUEUE_URL
+          value: "http://localstack:4566/000000000000/tasks"  # LocalStack service in K8s
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: access-key-id
+              optional: true
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: secret-access-key
+              optional: true
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        # Health checks disabled - worker runs continuously
+        # livenessProbe:
+        #   exec:
+        #     command:
+        #     - /bin/sh
+        #     - -c
+        #     - "ps aux | grep '[p]ython worker.py' || exit 1"
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 10
+        # readinessProbe:
+        #   exec:
+        #     command:
+        #     - /bin/sh
+        #     - -c
+        #     - "ps aux | grep '[p]ython worker.py' || exit 1"
+        #   initialDelaySeconds: 10
+        #   periodSeconds: 5
+

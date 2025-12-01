@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: job-worker-config
+  namespace: default
+data:
+  AWS_REGION: "us-east-1"
+  API_BASE_URL: "http://host.docker.internal:8000"
+  POLL_INTERVAL_SECONDS: "5"
+  MAX_MESSAGES_PER_POLL: "10"
+  WAIT_TIME_SECONDS: "20"
+

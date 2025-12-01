@@ -1,0 +1,67 @@
+.job-list {
+  width: 100%;
+}
+
+.job-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+}
+
+.job-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-tertiary);
+}
+
+.empty-state p {
+  font-size: 0.9375rem;
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+.empty-state a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.empty-state a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.pagination span {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  min-width: 100px;
+  text-align: center;
+}
+
+.pagination input[type="text"],
+.pagination select {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
