@@ -33,8 +33,9 @@ resource "aws_dynamodb_table" "jobs" {
   }
 
   global_secondary_index {
-    name     = "status-index"
-    hash_key = "status"
+    name           = "status-index"
+    hash_key       = "status"
+    projection_type = "ALL"
   }
 
   tags = {
