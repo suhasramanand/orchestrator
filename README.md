@@ -5,6 +5,7 @@ A production-ready distributed job orchestration system that combines AWS Server
 ## Table of Contents
 
 - [What This Project Is About](#what-this-project-is-about)
+- [Screenshots](#screenshots)
 - [Job Examples & Scenarios](#job-examples--scenarios)
 - [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
@@ -37,6 +38,24 @@ This is a **distributed job orchestration platform** that demonstrates how to bu
 - **Image/Video Processing**: Thumbnail generation, format conversion
 - **Report Generation**: Creating reports from large datasets
 - **Scientific Computing**: Parallel simulations, matrix operations
+
+## Screenshots
+
+### Jobs List
+![Jobs List](screenshots/01-jobs-list.png)
+*Main jobs listing with search, pagination, and status tracking*
+
+### Create Job Form
+![Create Job Form](screenshots/02-create-job-form.png)
+*Form for creating new jobs with configurable parameters*
+
+### Analytics Dashboard
+![Analytics Dashboard](screenshots/03-analytics-full.png)
+*Comprehensive analytics with charts and metrics*
+
+### Job Detail View
+![Job Detail View](screenshots/04-job-detail-view.png)
+*Detailed job view showing task progress and status*
 
 ## Job Examples & Scenarios
 
