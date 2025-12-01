@@ -320,7 +320,7 @@ aws --endpoint-url=http://localhost:4566 sqs create-queue \
 #### Automated Setup
 Use the provided script:
 ```bash
-./setup_localstack.sh
+./scripts/setup_localstack.sh
 ```
 
 ### Kubernetes Setup
@@ -331,7 +331,7 @@ Use the provided script:
 
 #### Create Cluster
 ```bash
-./setup_k8s.sh
+./scripts/setup_k8s.sh
 ```
 
 Or manually:
